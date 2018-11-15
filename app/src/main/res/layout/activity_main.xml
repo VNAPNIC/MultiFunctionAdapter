@@ -14,7 +14,11 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/listData"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:context="com.google.samples.apps.sunflower.GardenActivity"
+            tools:listitem="@layout/item_test" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

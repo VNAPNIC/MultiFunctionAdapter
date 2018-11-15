@@ -1,5 +1,6 @@
 package com.nankai.multifunctionadapter.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,12 +11,10 @@ import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import java.util.*
 
-abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.MultiFunctionViewHolder>(diffCallback: DiffUtil.ItemCallback<E>) : ListAdapter<E, VH>(diffCallback), IMultiFunctionAdapter {
-
-    private var mLayoutInflater: LayoutInflater? = null
-    protected var data: MutableList<E> = ArrayList()
+abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.MultiFunctionViewHolder>(diffUtil: DiffUtil.ItemCallback<E>)
+    : ListAdapter<E, VH>(diffUtil)
+        , IMultiFunctionAdapter {
 
     //header
     private var mHeaderLayout: LinearLayout? = null
@@ -25,13 +24,10 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
             mHeaderLayout!!.childCount
         else 0
 
-    override fun getItemCount(): Int {
-        return headerLayoutCount + data.size
-    }
-
     override fun getItemViewType(position: Int): Int {
-        if (position < headerLayoutCount)
+        if (position < headerLayoutCount) {
             return HEADER_VIEW
+        }
 
         val adjPosition = position - headerLayoutCount
 //        val adapterItemCount = data.size
@@ -42,7 +38,7 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        mLayoutInflater = LayoutInflater.from(parent.context)
+//        mLayoutInflater = LayoutInflater.from(parent.context)
         return when (viewType) {
             HEADER_VIEW -> {
                 HeaderViewHolder(mHeaderLayout) as VH
@@ -55,14 +51,12 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         val viewType = (holder as MultiFunctionViewHolder).itemViewType
-
         when (viewType) {
             HEADER_VIEW -> {
-                //TODO
             }
             else -> {
                 val adjPosition = position - headerLayoutCount
-                onViewReady(holder, data[adjPosition], adjPosition)
+                onViewReady(holder, adjPosition)
             }
         }
     }
@@ -130,7 +124,7 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
 
     abstract fun onInjectViewHolder(parent: ViewGroup, viewType: Int): VH
 
-    abstract fun onViewReady(holder: VH, item: E, adjPosition: Int)
+    abstract fun onViewReady(holder: VH, adjPosition: Int)
 
     //=================================== Inner class ============================================//
     companion object {

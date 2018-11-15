@@ -14,12 +14,12 @@ class TestAdapter : MultiFunctionAdapter<Data, TestAdapter.Companion.TestViewHol
         return TestViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_test, parent, false))
     }
 
-    override fun onViewReady(holder: TestViewHolder, item: Data, adjPosition: Int) {
-        holder.bind(item)
+    override fun onViewReady(holder: TestViewHolder, adjPosition: Int) {
+        holder.bind(getItem(adjPosition))
     }
 
     companion object {
-        class TestViewHolder internal constructor(view: View?) : MultiFunctionAdapter.Companion.MultiFunctionViewHolder(view) {
+        class TestViewHolder constructor(view: View?) : MultiFunctionAdapter.Companion.MultiFunctionViewHolder(view) {
             fun bind(item: Data) {
                 itemView.findViewById<TextView>(R.id.title).text = item.name
             }
