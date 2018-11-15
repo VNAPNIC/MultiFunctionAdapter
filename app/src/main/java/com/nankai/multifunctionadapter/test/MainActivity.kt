@@ -22,6 +22,8 @@ class MainActivity : AppCompatActivity() {
         listData.adapter = adapter
 
         adapter.setHeaderView(LayoutInflater.from(baseContext).inflate(R.layout.item_header, null))
+        adapter.setFooterView(LayoutInflater.from(baseContext).inflate(R.layout.item_footer, null))
+
         val data = DummyData.getDummyData()
         Log.i(TAG, "Dummy data : ${data.size}")
         adapter.submitList(data)
@@ -30,7 +32,5 @@ class MainActivity : AppCompatActivity() {
             adapter.submitList(DummyData.getDummyData())
             refresh.isRefreshing = false
         }
-
-        
     }
 }

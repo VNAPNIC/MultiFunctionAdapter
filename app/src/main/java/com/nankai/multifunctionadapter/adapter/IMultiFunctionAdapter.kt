@@ -19,17 +19,27 @@ interface IMultiFunctionAdapter {
      */
     interface AdapterListener<E>
 
+    fun getContentDataSize(): Int
+
+    //Header
     fun setHeaderView(view: View?)
 
-    fun setHeaderView(view: View?, index: Int?)
-
-    fun addHeaderView(view: View?)
-
-    fun addHeaderView(view: View?, orientation: Int?)
+    fun setHeaderView(view: View?, orientation: Int?)
 
     fun addHeaderView(view: View?, index: Int?, orientation: Int?)
 
     fun removeHeaderView(view: View?)
 
     fun removeAllHeaderView()
+
+    //Footer
+    fun setFooterView(view: View?)
+
+    fun setFooterView(view: View?, orientation: Int?)
+
+    fun addFooterView(view: View?, index: Int?, orientation: Int?)
+
+    fun removeFooterView(view: View?)
+
+    fun removeAllFooterView()
 }

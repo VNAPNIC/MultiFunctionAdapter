@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">MultiFunctionAdapter</string>
+    <string name="header">Header</string>
+    <string name="footer">Footer</string>
+
+    <string name="loading">Đang tải dữ liệu…</string>
+    <string name="load_failed">Tải dữ liệu bị lỗi (Tải lại)</string>
+    <string name="load_empty">Không còn dữ liệu (Tải lại)</string>
 </resources>
