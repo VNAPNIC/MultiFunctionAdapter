@@ -4,7 +4,6 @@ import android.view.View
 import androidx.annotation.IdRes
 import androidx.annotation.IntDef
 import androidx.annotation.LayoutRes
-import java.lang.annotation.RetentionPolicy
 
 
 abstract class LoadMoreView {
@@ -30,7 +29,7 @@ abstract class LoadMoreView {
      * @return LayoutRes
      */
     @get:LayoutRes
-    abstract val layoutId: Int
+    public abstract val layoutId: Int
 
     /**
      * layout_loading view
@@ -38,7 +37,7 @@ abstract class LoadMoreView {
      * @return @IdRes
      */
     @get:IdRes
-    protected abstract val loadingViewId: Int
+    public abstract val loadingViewId: Int
 
     /**
      * load fail view
@@ -46,7 +45,7 @@ abstract class LoadMoreView {
      * @return @IdRes
      */
     @get:IdRes
-    protected abstract val loadFailViewId: Int
+    public abstract val loadFailViewId: Int
 
     /**
      * load end view, you can return 0
@@ -54,7 +53,7 @@ abstract class LoadMoreView {
      * @return @IdRes
      */
     @get:IdRes
-    protected abstract val loadEndViewId: Int
+    public abstract val loadEndViewId: Int
 
     /**
      * load end view, you can return 0
@@ -62,7 +61,7 @@ abstract class LoadMoreView {
      * @return @IdRes
      */
     @get:IdRes
-    protected abstract val loadEmptyViewId: Int
+    public abstract val loadEmptyViewId: Int
 
     fun convert(holder: MultiFunctionAdapter.Companion.MultiFunctionViewHolder) {
         when (loadMoreStatus) {

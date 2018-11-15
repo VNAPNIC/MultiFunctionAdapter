@@ -6,7 +6,7 @@ interface IMultiFunctionAdapter {
 
     val HEADER_VIEW: Int
         get() = 0x00000111
-    val LOADING_VIEW: Int
+    val LOAD_MORE_VIEW: Int
         get() = 0x00000222
     val FOOTER_VIEW: Int
         get() = 0x00000333

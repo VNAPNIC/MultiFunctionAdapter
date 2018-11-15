@@ -1,5 +1,6 @@
 package com.nankai.multifunctionadapter.adapter
 
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -14,6 +15,7 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
     : ListAdapter<E, VH>(diffUtil)
         , IMultiFunctionAdapter {
 
+    private var mLoadMoreView: LoadMoreView? = null
     //header
     private var mHeaderLayout: LinearLayout? = null
     //Footer
@@ -44,19 +46,27 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
         if (position < headerLayoutCount)
             return HEADER_VIEW
 
-        if (footerLayoutCount > 0 && position == getContentDataSize() - if (isLoadMore) 1 else 0)
+        if (footerLayoutCount > 0 && position == getContentDataSize())
             return FOOTER_VIEW
 
         if (position < getContentDataSize())
             return onInjectItemViewType(getContentDataSize())
 
-        return LOADING_VIEW
+        return LOAD_MORE_VIEW
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
         return when (viewType) {
             HEADER_VIEW -> HeaderViewHolder(mHeaderLayout) as VH
             FOOTER_VIEW -> FooterViewHolder(mFooterLayout) as VH
+            LOAD_MORE_VIEW -> {
+
+                var view: View
+                mLoadMoreView?.layoutId?.let {
+                    view = LayoutInflater.from(parent.context).inflate(it, parent, false)
+                }
+                LoadMoreViewHolder(view) as VH
+            }
             else -> {
                 onInjectViewHolder(parent, viewType)
             }
@@ -192,6 +202,8 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
         class HeaderViewHolder internal constructor(view: View?) : MultiFunctionViewHolder(view)
 
         class FooterViewHolder internal constructor(view: View?) : MultiFunctionViewHolder(view)
+
+        class LoadMoreViewHolder internal constructor(view: View?) : MultiFunctionViewHolder(view)
 
     }
 }
