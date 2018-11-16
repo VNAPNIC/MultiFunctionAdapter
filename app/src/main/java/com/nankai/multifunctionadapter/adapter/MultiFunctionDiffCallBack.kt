@@ -3,11 +3,7 @@ package com.nankai.multifunctionadapter.adapter
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 
-open class MultiFunctionDiffCallBack<E>(var newList: List<E>?, var oldList: List<E>?) : DiffUtil.Callback() {
-
-    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        return true
-    }
+abstract class MultiFunctionDiffCallBack<E>(var newList: List<E>?, var oldList: List<E>?) : DiffUtil.Callback() {
 
     override fun getOldListSize(): Int {
         return if (oldList != null) newList!!.size else 0

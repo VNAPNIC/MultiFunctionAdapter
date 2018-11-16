@@ -282,11 +282,13 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
 
     //---------------------- binding data ---------------------------//
     override fun setNewData(newData: List<E>) {
-        val diffResult = DiffUtil.calculateDiff(MultiFunctionDiffCallBack(newData, currentList))
+        val diffResult = DiffUtil.calculateDiff(setDiffCallBack(newData,currentList))
         diffResult.dispatchUpdatesTo(this)
         this.currentList.clear()
         this.currentList.addAll(newData)
     }
+    
+    abstract fun setDiffCallBack(newData: List<E>,oldData: List<E>) :  MultiFunctionDiffCallBack<E>
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)

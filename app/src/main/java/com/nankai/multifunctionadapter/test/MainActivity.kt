@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity(), IMultiFunctionAdapter.LoadMoreListener
         }
 
         fabButtonAddNewData.setOnClickListener { _->
-            adapter.setNewData(DummyData.getDummyData())
+            adapter.setNewData(DummyData.getNewDummyData())
         }
     }
 }

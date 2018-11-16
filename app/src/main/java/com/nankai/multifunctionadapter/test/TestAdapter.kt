@@ -8,6 +8,7 @@ import androidx.annotation.NonNull
 import com.nankai.multifunctionadapter.R
 import com.nankai.multifunctionadapter.adapter.LoadMoreView
 import com.nankai.multifunctionadapter.adapter.MultiFunctionAdapter
+import com.nankai.multifunctionadapter.adapter.MultiFunctionDiffCallBack
 import com.nankai.multifunctionadapter.repository.Data
 
 class TestAdapter : MultiFunctionAdapter<Data, TestAdapter.Companion.TestViewHolder>() {
@@ -22,6 +23,10 @@ class TestAdapter : MultiFunctionAdapter<Data, TestAdapter.Companion.TestViewHol
 
     override fun setLoadMoreView(): LoadMoreView {
         return LoadMoreTest()
+    }
+
+    override fun setDiffCallBack(newData: List<Data>, oldData: List<Data>): MultiFunctionDiffCallBack<Data> {
+       return TestDiffCallBack(newData,oldData)
     }
 
     companion object {
