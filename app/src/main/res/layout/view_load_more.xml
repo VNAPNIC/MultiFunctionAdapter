@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="40dp">
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:id="@+id/load_more_loading_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="40dp"
         android:gravity="center"
         android:background="#ff00ff"
         android:orientation="horizontal"
@@ -26,48 +26,50 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
             android:text="@string/loading"
-            android:textColor="#0099ff"
+            android:textColor="#ffffff"
             android:textSize="14sp" />
     </LinearLayout>
 
     <FrameLayout
+        android:background="#ff00ff"
         android:id="@+id/load_more_load_fail_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="40dp"
         android:visibility="gone">
 
-        <com.vn.ntsc.widget.views.textview.TextViewVectorCompat
+        <TextView
             android:id="@+id/tv_prompt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/load_failed"
-            android:textColor="#0099ff" />
+            android:textColor="#ffffff" />
 
     </FrameLayout>
 
     <FrameLayout
         android:id="@+id/load_more_load_end_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:visibility="gone">
 
     </FrameLayout>
 
     <FrameLayout
+        android:background="#ff00ff"
         android:id="@+id/load_more_load_empty"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="40dp"
         android:visibility="gone">
 
-        <com.vn.ntsc.widget.views.textview.TextViewVectorCompat
+        <TextView
             android:id="@+id/tv_prompt_2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:drawablePadding="2dp"
             android:text="@string/load_empty"
-            android:textColor="#0099ff" />
+            android:textColor="#ffffff" />
 
     </FrameLayout>
 </FrameLayout>

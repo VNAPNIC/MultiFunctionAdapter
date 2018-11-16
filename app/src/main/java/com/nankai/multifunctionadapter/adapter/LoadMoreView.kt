@@ -1,5 +1,6 @@
 package com.nankai.multifunctionadapter.adapter
 
+import android.util.Log
 import android.view.View
 import androidx.annotation.IdRes
 import androidx.annotation.IntDef
@@ -12,6 +13,7 @@ abstract class LoadMoreView {
         @IntDef(STATUS_DEFAULT, STATUS_LOADING, STATUS_FAIL, STATUS_END, STATUS_EMPTY)
         @Retention(AnnotationRetention.SOURCE)
         annotation class Status
+
         const val STATUS_DEFAULT = 1
         const val STATUS_LOADING = 2
         const val STATUS_FAIL = 3
@@ -21,7 +23,7 @@ abstract class LoadMoreView {
 
     @Status
     @get:Status
-    var loadMoreStatus = STATUS_DEFAULT
+    public var loadMoreStatus = STATUS_DEFAULT
 
     /**
      * load more layout
@@ -64,6 +66,7 @@ abstract class LoadMoreView {
     public abstract val loadEmptyViewId: Int
 
     fun convert(holder: MultiFunctionAdapter.Companion.MultiFunctionViewHolder) {
+        Log.i(LoadMoreView::class.java.simpleName, "load more status: $loadMoreStatus")
         when (loadMoreStatus) {
             STATUS_LOADING -> {
                 visibleEmpty(holder, false)
@@ -113,7 +116,8 @@ abstract class LoadMoreView {
     private fun visibleLoadEnd(holder: MultiFunctionAdapter.Companion.MultiFunctionViewHolder, visible: Boolean) {
         val loadEndViewId = loadEndViewId
         if (loadEndViewId != 0) {
-            setVisible(holder, loadEndViewId, visible)
+            val view = holder.itemView.findViewById<View>(loadEndViewId)
+            view.visibility = if (visible) View.VISIBLE else View.GONE
         }
     }
 

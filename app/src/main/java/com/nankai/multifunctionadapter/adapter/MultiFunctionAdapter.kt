@@ -1,5 +1,6 @@
 package com.nankai.multifunctionadapter.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,92 +9,144 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.LinearLayout
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 
-abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.MultiFunctionViewHolder>(diffUtil: DiffUtil.ItemCallback<E>)
-    : ListAdapter<E, VH>(diffUtil)
-        , IMultiFunctionAdapter {
+
+abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.MultiFunctionViewHolder>
+    : RecyclerView.Adapter<VH>()
+        , IMultiFunctionAdapter<VH, E> {
+
+    protected var currentList: MutableList<E> = ArrayList()
+
+    private var loadMoreListener: IMultiFunctionAdapter.LoadMoreListener? = null
+
+    //RecyclerView
+    private var recyclerView: RecyclerView? = null
 
     private var mLoadMoreView: LoadMoreView? = null
     //header
     private var mHeaderLayout: LinearLayout? = null
     //Footer
     private var mFooterLayout: LinearLayout? = null
+    //LoadMore
+    private var isLoadMoreEnable = false
 
-    private var isLoadMore = false
+    var isReloadMore = false
 
-    public var headerLayoutCount: Int = 0
+    var isAutoLoadMore = false
+
+    var isLoading: Boolean = false
+        set(value) {
+            if (isLoadMoreEnable) {
+                field = value
+                Log.i(TAG, "isLoading $field & position ${getLoadMoreViewPosition()}")
+                if (!field) {
+                    mLoadMoreView?.loadMoreStatus = LoadMoreView.STATUS_DEFAULT
+                    notifyItemChanged(getLoadMoreViewPosition())
+                }
+            } else {
+                field = false
+            }
+        }
+
+    @LoadMoreView.Companion.Status
+    var status: Int = LoadMoreView.STATUS_DEFAULT
+        set(value) {
+            if (isLoadMoreEnable) {
+                Log.i(TAG, "Status $field & position ${getLoadMoreViewPosition()}")
+                if (value != mLoadMoreView?.loadMoreStatus) {
+                    field = value
+                    mLoadMoreView?.loadMoreStatus = field
+                    notifyItemChanged(getLoadMoreViewPosition())
+                }
+            }
+        }
+
+    var headerLayoutCount: Int = 0
         get() = if (mHeaderLayout != null)
             mHeaderLayout!!.childCount
         else 0
 
-    public var footerLayoutCount: Int = 0
+    var footerLayoutCount: Int = 0
         get() = if (mFooterLayout != null)
             mFooterLayout!!.childCount
         else 0
 
-    override fun getItemCount(): Int {
-        return super.getItemCount() + footerLayoutCount + if (isLoadMore) 1 else 0
-    }
+    override fun getItemCount(): Int = currentList.size + footerLayoutCount + if (isLoadMoreEnable) 1 else 0
 
-    override fun getContentDataSize(): Int {
-        return itemCount - footerLayoutCount - if (isLoadMore) 1 else 0
-    }
+    private fun getLoadMoreViewPosition(): Int = itemCount - 1
+
+    override fun getContentDataSize(): Int = itemCount - footerLayoutCount - if (isLoadMoreEnable) 1 else 0
 
     override fun getItemViewType(position: Int): Int {
-
-        if (position < headerLayoutCount)
+        Log.i(TAG, "getItemViewType position = $position")
+        if (position < headerLayoutCount) {
+            Log.i(TAG, "getItemViewType viewType = HEADER_VIEW")
             return HEADER_VIEW
+        }
 
-        if (footerLayoutCount > 0 && position == getContentDataSize())
-            return FOOTER_VIEW
-
-        if (position < getContentDataSize())
+        if (position < getContentDataSize()) {
+            Log.i(TAG, "getItemViewType viewType = onInjectItemViewType")
             return onInjectItemViewType(getContentDataSize())
+        }
 
+        if (footerLayoutCount > 0 && position < itemCount - if (isLoadMoreEnable) 1 else 0) {
+            Log.i(TAG, "getItemViewType viewType = FOOTER_VIEW")
+            return FOOTER_VIEW
+        }
+
+        Log.i(TAG, "getItemViewType viewType = LOAD_MORE_VIEW")
         return LOAD_MORE_VIEW
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        return when (viewType) {
-            HEADER_VIEW -> HeaderViewHolder(mHeaderLayout) as VH
-            FOOTER_VIEW -> FooterViewHolder(mFooterLayout) as VH
-            LOAD_MORE_VIEW -> {
-
-                var view: View
-                mLoadMoreView?.layoutId?.let {
-                    view = LayoutInflater.from(parent.context).inflate(it, parent, false)
-                }
-                LoadMoreViewHolder(view) as VH
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH = when (viewType) {
+        HEADER_VIEW -> HeaderViewHolder(mHeaderLayout) as VH
+        FOOTER_VIEW -> FooterViewHolder(mFooterLayout) as VH
+        LOAD_MORE_VIEW -> {
+            Log.i(TAG, "onCreateViewHolder viewType = LOAD_MORE_VIEW")
+            var view = View(parent.context)
+            mLoadMoreView?.layoutId?.let {
+                view = LayoutInflater.from(parent.context).inflate(it, parent, false)
             }
-            else -> {
-                onInjectViewHolder(parent, viewType)
-            }
+            LoadMoreViewHolder(view) as VH
+        }
+        else -> {
+            onInjectViewHolder(parent, viewType)
         }
     }
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         val viewType = (holder as MultiFunctionViewHolder).itemViewType
+        Log.i(TAG, "onBindViewHolder viewType = $viewType")
         when (viewType) {
             HEADER_VIEW -> {
             }
             FOOTER_VIEW -> {
             }
+            LOAD_MORE_VIEW -> {
+                autoLoadMore(position)
+                mLoadMoreView?.convert(holder)
+                holder.itemView.setOnClickListener { _ ->
+                    mLoadMoreView.let {
+                        if (isReloadMore
+                                && (
+                                        it?.loadMoreStatus == LoadMoreView.STATUS_FAIL
+                                                || it?.loadMoreStatus == LoadMoreView.STATUS_EMPTY
+                                                || it?.loadMoreStatus == LoadMoreView.STATUS_END
+                                        )
+                        )
+                            reloadMore()
+                    }
+                }
+            }
             else -> {
-                val adjPosition = position - footerLayoutCount
+                val adjPosition = position - headerLayoutCount
                 onViewReady(holder, adjPosition)
             }
         }
     }
 
-    protected open fun onInjectItemViewType(position: Int): Int {
-        return super.getItemViewType(position)
-    }
-
-    abstract fun onInjectViewHolder(parent: ViewGroup, viewType: Int): VH
-
-    abstract fun onViewReady(holder: VH, adjPosition: Int)
+    protected open fun onInjectItemViewType(position: Int): Int = super.getItemViewType(position)
 
     //---------------------- Header ---------------------------//
     override fun setHeaderView(view: View?) {
@@ -107,7 +160,6 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
     }
 
     override fun addHeaderView(view: View?, index: Int?, orientation: Int?) {
-
         if (mHeaderLayout == null) {
             mHeaderLayout = LinearLayout(view?.context)
             if (orientation == LinearLayout.VERTICAL) {
@@ -137,7 +189,6 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
         mHeaderLayout?.removeView(view)
         notifyDataSetChanged()
     }
-
 
     override fun removeAllHeaderView() {
         if (headerLayoutCount <= 0)
@@ -195,8 +246,64 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
         notifyDataSetChanged()
     }
 
+    //---------------------- LoadMore ---------------------------//
+    override fun setOnLoadMoreListener(loadMoreListener: IMultiFunctionAdapter.LoadMoreListener) {
+        loadMoreListener.let {
+            this.loadMoreListener = it
+            enableLoadMore(true)
+        }
+    }
+
+    override fun enableLoadMore(enable: Boolean) {
+        isLoadMoreEnable = true
+        mLoadMoreView = setLoadMoreView()
+    }
+
+    private fun autoLoadMore(position: Int) {
+        if (!isLoadMoreEnable)
+            return
+        if (position < getLoadMoreViewPosition())
+            return
+        if (mLoadMoreView?.loadMoreStatus != LoadMoreView.STATUS_DEFAULT)
+            return
+        if (!isAutoLoadMore)
+            return
+        mLoadMoreView?.loadMoreStatus = LoadMoreView.STATUS_LOADING
+
+        recyclerView?.post {
+            loadMoreListener?.onLoadMore()
+        }
+    }
+
+    private fun reloadMore() {
+        mLoadMoreView?.loadMoreStatus = LoadMoreView.STATUS_DEFAULT
+        notifyItemChanged(getLoadMoreViewPosition())
+    }
+
+    //---------------------- binding data ---------------------------//
+    override fun setNewData(newData: List<E>) {
+        val diffResult = DiffUtil.calculateDiff(MultiFunctionDiffCallBack(newData, currentList))
+        diffResult.dispatchUpdatesTo(this)
+        this.currentList.clear()
+        this.currentList.addAll(newData)
+    }
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        Log.i(TAG, "onAttachedToRecyclerView $recyclerView")
+        this.recyclerView = recyclerView
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        Log.i(TAG, "onDetachedFromRecyclerView $recyclerView")
+        this.recyclerView = null
+    }
+
     //=================================== Inner class ============================================//
     companion object {
+        private val TAG: String = MultiFunctionAdapter::class.java.simpleName
+
         open class MultiFunctionViewHolder internal constructor(rootView: View?) : RecyclerView.ViewHolder(rootView!!)
 
         class HeaderViewHolder internal constructor(view: View?) : MultiFunctionViewHolder(view)

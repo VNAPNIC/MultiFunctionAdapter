@@ -1,23 +1,26 @@
 package com.nankai.multifunctionadapter.adapter
 
 import android.view.View
+import android.view.ViewGroup
 
-interface IMultiFunctionAdapter {
+interface IMultiFunctionAdapter<VH : MultiFunctionAdapter.Companion.MultiFunctionViewHolder,E> {
 
     val HEADER_VIEW: Int
-        get() = 0x00000111
-    val LOAD_MORE_VIEW: Int
-        get() = 0x00000222
+        get() = -1
     val FOOTER_VIEW: Int
-        get() = 0x00000333
+        get() = -2
+    val LOAD_MORE_VIEW: Int
+        get() = -3
     val EMPTY_VIEW: Int
-        get() = 0x00000555
+        get() = -4
 
-    /**
-     * child class extend it
-     * it is callback of item view to Main
-     */
-    interface AdapterListener<E>
+    interface LoadMoreListener {
+        fun onLoadMore()
+    }
+
+    fun onInjectViewHolder(parent: ViewGroup, viewType: Int): VH
+
+    fun onViewReady(holder: VH, adjPosition: Int)
 
     fun getContentDataSize(): Int
 
@@ -42,4 +45,14 @@ interface IMultiFunctionAdapter {
     fun removeFooterView(view: View?)
 
     fun removeAllFooterView()
+
+    //LoadMore
+    fun setOnLoadMoreListener(loadMoreListener: LoadMoreListener)
+
+    fun enableLoadMore(enable: Boolean)
+
+    fun setLoadMoreView(): LoadMoreView
+
+    //binding data
+    fun setNewData(newData: List<E>)
 }

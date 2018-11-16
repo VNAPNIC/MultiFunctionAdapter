@@ -1,19 +1,21 @@
 package com.nankai.multifunctionadapter.test
 
-import androidx.recyclerview.widget.DiffUtil
 import com.nankai.multifunctionadapter.repository.Data
+import android.os.Bundle
+import com.nankai.multifunctionadapter.adapter.MultiFunctionDiffCallBack
 
-class TestDiffCallBack : DiffUtil.ItemCallback<Data>() {
+class TestDiffCallBack(newList: MutableList<Data>?, oldList: MutableList<Data>?) : MultiFunctionDiffCallBack<Data>(newList, oldList) {
 
-    override fun areContentsTheSame(
-            oldItem: Data,
-            newItem: Data): Boolean {
-        return oldItem == newItem
-    }
+    override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int): Any? {
+        val newContact = newList?.get(newItemPosition)
+        val oldContact = oldList?.get(oldItemPosition)
 
-    override fun areItemsTheSame(
-            oldItem: Data,
-            newItem: Data): Boolean {
-        return oldItem.id == newItem.id
+        val diff = Bundle()
+        if (!newContact?.name.equals(oldContact?.name)) {
+            diff.putString("name", newContact?.name)
+        }
+        return if (diff.size() == 0) {
+            null
+        } else diff
     }
 }

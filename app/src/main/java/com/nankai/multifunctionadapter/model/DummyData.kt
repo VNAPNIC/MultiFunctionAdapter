@@ -12,5 +12,14 @@ class DummyData {
             }
             return listItem
         }
+
+        fun getNewDummyData(): MutableList<Data> {
+            val listItem: MutableList<Data> = ArrayList()
+
+            for (i in 51..80) {
+                listItem.add(Data(i, "Name $i"))
+            }
+            return listItem
+        }
     }
 }
