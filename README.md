@@ -1,4 +1,4 @@
-MultifunctionAdapter
+MultiFunctionAdapter
 ==========
 
 Provides a simple way to extend the default RecyclerView behaviour with support for headers, footers, empty view, DiffUtil and ArrayAdapter like methods.
