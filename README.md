@@ -37,7 +37,7 @@ DiffUtil support for [MultifunctionAdapter](https://github.com/VNAPNIC/Multifunc
     adapter?.update(new ItemDiffUtilResult())
 ```    
 
-As [DiffUtil](https://developer.android.com/reference/android/support/v7/util/DiffUtil.html) is a blocking sync action, it's executed on the background thread inside the  [MultifunctionAdapter](https://github.com/infinum/MjolnirRecyclerView/blob/master/mjolnirrecyclerview/src/main/java/co/infinum/mjolnirrecyclerview/MjolnirRecyclerAdapter.java) by using a [AsyncTask](https://developer.android.com/reference/android/os/AsyncTask.html). As a result of this approach, you need to call [cancel()](https://github.com/infinum/MjolnirRecyclerView/blob/master/mjolnirrecyclerview/src/main/java/co/infinum/mjolnirrecyclerview/MjolnirRecyclerAdapter.java#L126) method on your adapter when your activity or fragment is about to be destroyed, so that the adapter is not updated if the screen has been destroyed.
+As [DiffUtil](https://developer.android.com/reference/android/support/v7/util/DiffUtil.html) is a blocking sync action, it's executed on the background thread inside the  [MultifunctionAdapter](https://github.com/VNAPNIC/MultifunctionAdapter/blob/master/app/src/main/java/com/nankai/multifunctionadapter/adapter/MultiFunctionAdapter.kt) by using a [AsyncTask](https://developer.android.com/reference/android/os/AsyncTask.html). As a result of this approach, you need to call [cancel()](https://github.com/VNAPNIC/MultifunctionAdapter/blob/master/app/src/main/java/com/nankai/multifunctionadapter/adapter/MultiFunctionAdapter.kt#L126) method on your adapter when your activity or fragment is about to be destroyed, so that the adapter is not updated if the screen has been destroyed.
 
 ```kotlin
     override fun onDestroy() {
