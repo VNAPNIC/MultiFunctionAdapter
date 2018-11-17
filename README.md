@@ -7,7 +7,7 @@ Provides a simple way to extend the default RecyclerView behaviour with support 
 
 ### 1. Header & footer support
 
-Add vs Remove a custom number of headers and footers to [MultifunctionAdapter](https://github.com/VNAPNIC/MultifunctionAdapter/blob/master/app/src/main/java/com/nankai/multifunctionadapter/adapter/MultiFunctionAdapter.kt) by using 3 simple methods from [MultifunctionAdapter](https://github.com/VNAPNIC/MultifunctionAdapter/blob/master/app/src/main/java/com/nankai/multifunctionadapter/adapter/MultiFunctionAdapter.kt):
+Add vs Remove a custom number of headers and footers to [MultifunctionAdapter](https://github.com/VNAPNIC/MultifunctionAdapter/blob/master/app/src/main/java/com/nankai/multifunctionadapter/adapter/MultiFunctionAdapter.kt) by using the simple methods from [MultifunctionAdapter](https://github.com/VNAPNIC/MultifunctionAdapter/blob/master/app/src/main/java/com/nankai/multifunctionadapter/adapter/MultiFunctionAdapter.kt):
 
 ```java
     //Header
