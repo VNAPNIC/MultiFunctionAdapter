@@ -24,7 +24,7 @@ class TestDiffCallBack(newList: List<Data>?, oldList: List<Data>?) : MultiFuncti
             diff.putString("name", newData?.name)
         }
         return if (diff.size() == 0) {
-            null
+            super.getChangePayload(oldItemPosition, newItemPosition)
         } else diff
     }
 }

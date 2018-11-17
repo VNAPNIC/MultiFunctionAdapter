@@ -2,8 +2,9 @@ package com.nankai.multifunctionadapter.adapter
 
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 
-interface IMultiFunctionAdapter<VH : MultiFunctionAdapter.Companion.MultiFunctionViewHolder,E> {
+interface IMultiFunctionAdapter<VH : MultiFunctionAdapter.Companion.MultiFunctionViewHolder, E> {
 
     val HEADER_VIEW: Int
         get() = -1
@@ -54,5 +55,47 @@ interface IMultiFunctionAdapter<VH : MultiFunctionAdapter.Companion.MultiFunctio
     fun setLoadMoreView(): LoadMoreView
 
     //binding data
-    fun setNewData(newData: List<E>)
+    fun add(item: E?)
+
+    fun add(collection: Collection<E>?)
+
+    fun add(item: E?, index: Int)
+
+    fun addAll(collection: Collection<E>?, index: Int)
+
+    fun remove(item: E?)
+
+    fun removeAll(collection: Collection<E>?)
+
+    fun remove(index: Int)
+
+    fun get(index: Int): E
+
+    fun set(item: E?, index: Int)
+
+    fun getAll(): Collection<E>
+
+    fun clear()
+
+    //DiffUtil
+
+    /**
+     * Update the current adapter state. If {@param callback} is provided, an updated data set is calculated with DiffUtil, otherwise
+     * current data set is clear and {@param newItems} are added to the internal items collection.
+     *
+     * @param newItems Collection of new items, which are added to adapter.
+     * @param callback DiffUtil callback, which is used to update the items.
+     */
+    fun update(newItems: Collection<E>?, callBack: DiffUtil.Callback?)
+
+    /**
+     * Sets the isCancelled flag to true, which will cancel DiffUtil.DiffResult update dispatch to the adapter. Call this method when
+     * your activity or fragment is about to be destroyed.
+     */
+    fun cancel()
+
+    /**
+     * Sets the isCancelled flag to false, which will enable DiffUtil.DiffResult update dispatch to the adapter.
+     */
+    fun reset()
 }

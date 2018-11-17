@@ -1,6 +1,5 @@
 package com.nankai.multifunctionadapter.adapter
 
-import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 
 abstract class MultiFunctionDiffCallBack<E>(var newList: List<E>?, var oldList: List<E>?) : DiffUtil.Callback() {

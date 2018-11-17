@@ -18,15 +18,11 @@ class TestAdapter : MultiFunctionAdapter<Data, TestAdapter.Companion.TestViewHol
     }
 
     override fun onViewReady(holder: TestViewHolder, adjPosition: Int) {
-        holder.bind(currentList[adjPosition])
+        holder.bind(getAll().elementAt(adjPosition))
     }
 
     override fun setLoadMoreView(): LoadMoreView {
         return LoadMoreTest()
-    }
-
-    override fun setDiffCallBack(newData: List<Data>, oldData: List<Data>): MultiFunctionDiffCallBack<Data> {
-       return TestDiffCallBack(newData,oldData)
     }
 
     companion object {
