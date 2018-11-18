@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity(), IMultiFunctionAdapter.LoadMoreListener
         val handler = Handler()
         handler.postDelayed({
             if (!isFinishing) {
-                adapter?.add(DummyData.getOneDummyData(adapter?.getAll() as MutableList<Data>))
+                adapter?.add(DummyData.getNewDummyData(adapter?.getAll() as MutableList<Data>))
                 adapter?.isLoading = false
             }
         }, 5000)
@@ -52,24 +52,28 @@ class MainActivity : AppCompatActivity(), IMultiFunctionAdapter.LoadMoreListener
             refresh.isRefreshing = false
         }
 
-        fabButtonLoad.setOnClickListener { _ ->
+        fabButtonLoad.setOnClickListener {
             adapter?.isLoading = false
         }
 
-        fabButtonFail.setOnClickListener { _ ->
+        fabButtonFail.setOnClickListener {
             adapter?.status = LoadMoreView.STATUS_FAIL
         }
 
-        fabButtonEmpty.setOnClickListener { _ ->
+        fabButtonEmpty.setOnClickListener {
             adapter?.status = LoadMoreView.STATUS_EMPTY
         }
 
-        fabButtonEnd.setOnClickListener { _ ->
+        fabButtonEnd.setOnClickListener {
             adapter?.status = LoadMoreView.STATUS_END
         }
 
-        fabButtonAddNewData.setOnClickListener { _ ->
-            adapter?.add(DummyData.getNewDummyData())
+        fabButtonAddNewData.setOnClickListener {
+            adapter?.add(DummyData.getOneDummyData(adapter?.getAll() as MutableList<Data>)[0], 0)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
     }
 }

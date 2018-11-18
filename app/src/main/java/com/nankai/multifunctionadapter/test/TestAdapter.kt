@@ -32,4 +32,6 @@ class TestAdapter : MultiFunctionAdapter<Data, TestAdapter.Companion.TestViewHol
             }
         }
     }
+
+
 }

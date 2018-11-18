@@ -356,7 +356,7 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
             throw IllegalStateException("Index is defined in wrong range!")
         } else {
             item?.let {
-                items.add(index, it)
+                items.add(calculateIndex(index, false), it)
                 notifyItemInserted(calculateIndex(index, false))
             }
         }
@@ -367,7 +367,7 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
             if (index >= items.size) {
                 throw IllegalStateException("Index is defined in wrong range!")
             } else {
-                items.addAll(index, it)
+                items.addAll(calculateIndex(index, false), it)
                 notifyItemRangeInserted(calculateIndex(index, false), it.size)
             }
         }
@@ -393,7 +393,7 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
     override fun remove(index: Int) {
         if (index >= items.size) {
             throw IllegalStateException("Index is defined in wrong range!")
-        } else if (items.removeAt(index) != null) {
+        } else if (items.removeAt(calculateIndex(index, false)) != null) {
             notifyItemRemoved(calculateIndex(index, false))
         }
     }
@@ -402,12 +402,12 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
         if (index >= items.size) {
             throw IllegalStateException("Index is defined in wrong range!")
         }
-        return items[index]
+        return items[calculateIndex(index, false)]
     }
 
     override fun set(item: E?, index: Int) {
         item.let {
-            items[index] = it!!
+            items[calculateIndex(index, false)] = it!!
             notifyItemChanged(calculateIndex(index, false))
         }
     }
