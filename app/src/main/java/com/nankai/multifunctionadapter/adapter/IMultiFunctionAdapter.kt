@@ -2,6 +2,7 @@ package com.nankai.multifunctionadapter.adapter
 
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.DiffUtil
 
 interface IMultiFunctionAdapter<VH : MultiFunctionAdapter.Companion.MultiFunctionViewHolder, E> {
@@ -53,6 +54,11 @@ interface IMultiFunctionAdapter<VH : MultiFunctionAdapter.Companion.MultiFunctio
     fun enableLoadMore(enable: Boolean)
 
     fun setLoadMoreView(): LoadMoreView
+
+    //Empty
+    fun setEmptyView(@LayoutRes layoutRes: Int)
+
+    fun setEmptyView(@LayoutRes layoutRes: Int, viewGroup: ViewGroup)
 
     //binding data
     fun add(item: E?)

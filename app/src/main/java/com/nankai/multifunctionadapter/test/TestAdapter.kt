@@ -17,6 +17,7 @@ class TestAdapter : MultiFunctionAdapter<Data, TestAdapter.Companion.TestViewHol
         return TestViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_test, parent, false))
     }
 
+
     override fun onViewReady(holder: TestViewHolder, adjPosition: Int) {
         holder.bind(getAll().elementAt(adjPosition))
     }

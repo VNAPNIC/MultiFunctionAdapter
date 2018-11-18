@@ -17,13 +17,13 @@ class MainActivity : AppCompatActivity(), IMultiFunctionAdapter.LoadMoreListener
     var adapter: TestAdapter? = null
     override fun onLoadMore() {
         Log.i(MainActivity::class.java.simpleName, "-------------------------> LoadMore")
-        val handler = Handler()
-        handler.postDelayed({
-            if (!isFinishing) {
-                adapter?.add(DummyData.getNewDummyData(adapter?.getAll() as MutableList<Data>))
-                adapter?.isLoading = false
-            }
-        }, 5000)
+//        val handler = Handler()
+//        handler.postDelayed({
+//            if (!isFinishing) {
+//                adapter?.add(DummyData.getNewDummyData(adapter?.getAll() as MutableList<Data>))
+//                adapter?.isLoading = false
+//            }
+//        }, 5000)
     }
 
     companion object {
@@ -36,11 +36,14 @@ class MainActivity : AppCompatActivity(), IMultiFunctionAdapter.LoadMoreListener
         adapter = TestAdapter()
         listData.adapter = adapter
 
-        adapter?.setHeaderView(LayoutInflater.from(baseContext).inflate(R.layout.item_header, null))
+//        adapter?.setHeaderView(LayoutInflater.from(baseContext).inflate(R.layout.item_header, null))
         adapter?.setFooterView(LayoutInflater.from(baseContext).inflate(R.layout.item_footer, null))
+
+//        adapter?.setEmptyView(R.layout.layout_empty)
+
         adapter?.setOnLoadMoreListener(this)
-        adapter?.isReloadMore = true
-        adapter?.isAutoLoadMore = true
+//        adapter?.isReloadMore = true
+//        adapter?.isAutoLoadMore = true
 
         val data = DummyData.getDummyData()
         Log.i(TAG, "Dummy data : ${data.size}")
@@ -57,15 +60,15 @@ class MainActivity : AppCompatActivity(), IMultiFunctionAdapter.LoadMoreListener
         }
 
         fabButtonFail.setOnClickListener {
-            adapter?.status = LoadMoreView.STATUS_FAIL
+            adapter?.loadMoreStatus = LoadMoreView.STATUS_FAIL
         }
 
         fabButtonEmpty.setOnClickListener {
-            adapter?.status = LoadMoreView.STATUS_EMPTY
+            adapter?.loadMoreStatus = LoadMoreView.STATUS_EMPTY
         }
 
         fabButtonEnd.setOnClickListener {
-            adapter?.status = LoadMoreView.STATUS_END
+            adapter?.loadMoreStatus = LoadMoreView.STATUS_END
         }
 
         fabButtonAddNewData.setOnClickListener {

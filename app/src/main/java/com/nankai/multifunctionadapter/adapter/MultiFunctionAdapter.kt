@@ -8,10 +8,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -28,16 +31,44 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
 
     private var loadMoreListener: IMultiFunctionAdapter.LoadMoreListener? = null
 
-    //RecyclerView
+    /*
+    * RecyclerView
+    */
     private var recyclerView: RecyclerView? = null
 
-    private var mLoadMoreView: LoadMoreView? = null
-    //header
+    /*
+      * Header
+      */
+    /**
+     * if asFlow is true,header will arrange like normal item view.
+     * only works when use [GridLayoutManager],and it will ignore span size.
+     */
+    var headerViewAsFlow: Boolean = false
     private var mHeaderLayout: LinearLayout? = null
-    //Footer
+    var headerLayoutCount: Int = 0
+        get() = if (mHeaderLayout != null)
+            mHeaderLayout!!.childCount
+        else 0
+
+    /*
+    * Footer
+    */
+    /**
+     * if asFlow is true,footer will arrange like normal item view.
+     * only works when use [GridLayoutManager],and it will ignore span size.
+     */
+    var footerViewAsFlow: Boolean = false
     private var mFooterLayout: LinearLayout? = null
-    //LoadMore
+    var footerLayoutCount: Int = 0
+        get() = if (mFooterLayout != null)
+            mFooterLayout!!.childCount
+        else 0
+
+    /*
+    * LoadMore
+    */
     private var isLoadMoreEnable = false
+    private var mLoadMoreView: LoadMoreView? = null
 
     var isReloadMore = false
 
@@ -58,7 +89,7 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
         }
 
     @LoadMoreView.Companion.Status
-    var status: Int = LoadMoreView.STATUS_DEFAULT
+    var loadMoreStatus: Int = LoadMoreView.STATUS_DEFAULT
         set(value) {
             if (isLoadMoreEnable) {
                 Log.i(TAG, "Status $field & position ${getLoadMoreViewPosition()}")
@@ -70,15 +101,10 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
             }
         }
 
-    var headerLayoutCount: Int = 0
-        get() = if (mHeaderLayout != null)
-            mHeaderLayout!!.childCount
-        else 0
-
-    var footerLayoutCount: Int = 0
-        get() = if (mFooterLayout != null)
-            mFooterLayout!!.childCount
-        else 0
+    /*
+     * Empty Layout
+     */
+    private var mEmptyLayout: FrameLayout? = null
 
     /**
      * Calculate the correct item index because RecyclerView doesn't distinguish
@@ -179,19 +205,60 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
         }
     }
 
+    override fun onViewAttachedToWindow(holder: VH) {
+        super.onViewAttachedToWindow(holder)
+        val type = holder.itemViewType
+        if (isFixedViewType(type))
+            setFullSpan(holder)
+    }
+
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         this.recyclerView = recyclerView
+        val manage: RecyclerView.LayoutManager? = recyclerView.layoutManager
+        manage?.let {
+            if (it is GridLayoutManager) {
+                val gridLayoutManager: GridLayoutManager = manage as GridLayoutManager
+                gridLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                    override fun getSpanSize(position: Int): Int {
+                        val type = getItemViewType(position)
+                        if (type == HEADER_VIEW && headerViewAsFlow)
+                            return 1
+                        if (type == FOOTER_VIEW && footerViewAsFlow)
+                            return 1
+                        return if (isFixedViewType(type)) gridLayoutManager.spanCount else 1
+                    }
+                }
+            }
+        }
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
+        cancel()
+        this.mHeaderLayout = null
+        this.mFooterLayout = null
+        this.mLoadMoreView = null
+        this.loadMoreListener = null
         this.recyclerView = null
     }
 
     protected open fun onInjectItemViewType(position: Int): Int = super.getItemViewType(position)
 
-    //---------------------- Header ---------------------------//
+    private fun setFullSpan(holder: RecyclerView.ViewHolder) {
+        if (holder.itemView.layoutParams is StaggeredGridLayoutManager.LayoutParams) {
+            val params: StaggeredGridLayoutManager.LayoutParams = holder.itemView.layoutParams as StaggeredGridLayoutManager.LayoutParams
+            params.isFullSpan = true
+        }
+    }
+
+    private fun isFixedViewType(type: Int): Boolean {
+        return type == EMPTY_VIEW || type == HEADER_VIEW || type == FOOTER_VIEW || type == LOAD_MORE_VIEW
+    }
+
+    /*
+     * Header
+     */
     override fun setHeaderView(view: View?) {
         mHeaderLayout?.removeAllViews()
         setHeaderView(view, LinearLayoutCompat.VERTICAL)
@@ -240,7 +307,9 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
         notifyDataSetChanged()
     }
 
-    //---------------------- Footer ---------------------------//
+    /*
+    * Footer
+    */
     override fun setFooterView(view: View?) {
         mFooterLayout?.removeAllViews()
         setFooterView(view, LinearLayoutCompat.VERTICAL)
@@ -289,7 +358,9 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
         notifyDataSetChanged()
     }
 
-    //---------------------- LoadMore ---------------------------//
+    /*
+     * LoadMore
+     */
     override fun setOnLoadMoreListener(loadMoreListener: IMultiFunctionAdapter.LoadMoreListener) {
         loadMoreListener.let {
             this.loadMoreListener = it
@@ -333,8 +404,41 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
         notifyItemChanged(getLoadMoreViewPosition())
     }
 
-    //---------------------- binding data ---------------------------//
+    /*
+    * Layout Empty
+    */
+    override fun setEmptyView(layoutRes: Int) {
+        recyclerView?.let {
+            setEmptyView(layoutRes, it)
+        }
+    }
 
+    override fun setEmptyView(layoutRes: Int, viewGroup: ViewGroup) {
+        val view = LayoutInflater.from(viewGroup.context).inflate(layoutRes, viewGroup, false)
+        setEmptyView(view)
+    }
+
+    private fun setEmptyView(view: View?) {
+        view?.let { viewEmpty ->
+            if (mEmptyLayout == null) {
+                mEmptyLayout = FrameLayout(viewEmpty.context)
+                val layoutParamRoot = RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.MATCH_PARENT)
+                val layoutParams = viewEmpty.layoutParams
+                layoutParamRoot.width = layoutParams.width
+                layoutParamRoot.height = layoutParams.height
+                mEmptyLayout!!.layoutParams = layoutParamRoot
+            }
+            mEmptyLayout?.let { emptyLayout ->
+                emptyLayout.removeAllViews()
+                emptyLayout.addView(view)
+                notifyDataSetChanged()
+            }
+        }
+    }
+
+    /*
+         * Data binding
+         */
     override fun add(item: E?) {
         item?.let {
             val position = items.size
