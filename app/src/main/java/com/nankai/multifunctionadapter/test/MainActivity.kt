@@ -36,10 +36,9 @@ class MainActivity : AppCompatActivity(), IMultiFunctionAdapter.LoadMoreListener
         adapter = TestAdapter()
         listData.adapter = adapter
 
-//        adapter?.setHeaderView(LayoutInflater.from(baseContext).inflate(R.layout.item_header, null))
+        adapter?.setHeaderView(LayoutInflater.from(baseContext).inflate(R.layout.item_header, null))
         adapter?.setFooterView(LayoutInflater.from(baseContext).inflate(R.layout.item_footer, null))
-
-//        adapter?.setEmptyView(R.layout.layout_empty)
+        adapter?.setEmptyView(LayoutInflater.from(baseContext).inflate(R.layout.layout_empty, null))
 
         adapter?.setOnLoadMoreListener(this)
 //        adapter?.isReloadMore = true
@@ -73,6 +72,10 @@ class MainActivity : AppCompatActivity(), IMultiFunctionAdapter.LoadMoreListener
 
         fabButtonAddNewData.setOnClickListener {
             adapter?.add(DummyData.getOneDummyData(adapter?.getAll() as MutableList<Data>)[0], 0)
+        }
+
+        fabButtonDataEmpty.setOnClickListener {
+            adapter?.enableEmpty = true
         }
     }
 

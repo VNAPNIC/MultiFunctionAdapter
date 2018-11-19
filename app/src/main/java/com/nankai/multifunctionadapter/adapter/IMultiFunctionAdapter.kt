@@ -29,9 +29,9 @@ interface IMultiFunctionAdapter<VH : MultiFunctionAdapter.Companion.MultiFunctio
     //Header
     fun setHeaderView(view: View?)
 
-    fun setHeaderView(view: View?, orientation: Int?)
+    fun setHeaderView(view: View?, orientation: Int)
 
-    fun addHeaderView(view: View?, index: Int?, orientation: Int?)
+    fun addHeaderView(view: View?, index: Int, orientation: Int)
 
     fun removeHeaderView(view: View?)
 
@@ -40,9 +40,9 @@ interface IMultiFunctionAdapter<VH : MultiFunctionAdapter.Companion.MultiFunctio
     //Footer
     fun setFooterView(view: View?)
 
-    fun setFooterView(view: View?, orientation: Int?)
+    fun setFooterView(view: View?, orientation: Int)
 
-    fun addFooterView(view: View?, index: Int?, orientation: Int?)
+    fun addFooterView(view: View?, index: Int, orientation: Int)
 
     fun removeFooterView(view: View?)
 
@@ -56,9 +56,7 @@ interface IMultiFunctionAdapter<VH : MultiFunctionAdapter.Companion.MultiFunctio
     fun setLoadMoreView(): LoadMoreView
 
     //Empty
-    fun setEmptyView(@LayoutRes layoutRes: Int)
-
-    fun setEmptyView(@LayoutRes layoutRes: Int, viewGroup: ViewGroup)
+    fun setEmptyView(view: View?)
 
     //binding data
     fun add(item: E?)
