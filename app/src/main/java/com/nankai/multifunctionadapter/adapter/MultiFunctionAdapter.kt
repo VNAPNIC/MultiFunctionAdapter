@@ -85,7 +85,6 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
             }
         }
 
-    @LoadMoreView.Companion.Status
     var loadMoreStatus: Int = LoadMoreView.STATUS_DEFAULT
         set(value) {
             if (isLoadMoreEnable) {

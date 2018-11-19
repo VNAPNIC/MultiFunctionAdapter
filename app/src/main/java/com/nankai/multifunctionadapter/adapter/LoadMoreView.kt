@@ -10,10 +10,6 @@ import androidx.annotation.LayoutRes
 abstract class LoadMoreView {
 
     companion object {
-        @IntDef(STATUS_DEFAULT, STATUS_LOADING, STATUS_FAIL, STATUS_END, STATUS_EMPTY)
-        @Retention(AnnotationRetention.SOURCE)
-        annotation class Status
-
         const val STATUS_DEFAULT = 1
         const val STATUS_LOADING = 2
         const val STATUS_FAIL = 3
@@ -21,8 +17,6 @@ abstract class LoadMoreView {
         const val STATUS_EMPTY = 5
     }
 
-    @Status
-    @get:Status
     public var loadMoreStatus = STATUS_DEFAULT
 
     /**
