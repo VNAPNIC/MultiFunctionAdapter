@@ -3,13 +3,11 @@ package com.nankai.multifunctionadapter.test
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.annotation.NonNull
 import com.nankai.multifunctionadapter.R
 import com.nankai.multifunctionadapter.adapter.LoadMoreView
 import com.nankai.multifunctionadapter.adapter.MultiFunctionAdapter
-import com.nankai.multifunctionadapter.adapter.MultiFunctionDiffCallBack
 import com.nankai.multifunctionadapter.repository.Data
+import kotlinx.android.synthetic.main.item_test.view.*
 
 class TestAdapter : MultiFunctionAdapter<Data, TestAdapter.Companion.TestViewHolder>() {
 
@@ -18,8 +16,8 @@ class TestAdapter : MultiFunctionAdapter<Data, TestAdapter.Companion.TestViewHol
     }
 
 
-    override fun onViewReady(holder: TestViewHolder, adjPosition: Int) {
-        holder.bind(getAll().elementAt(adjPosition))
+    override fun onViewReady(holder: TestViewHolder, position: Int) {
+        holder.bind(get(position), position)
     }
 
     override fun setLoadMoreView(): LoadMoreView {
@@ -28,8 +26,8 @@ class TestAdapter : MultiFunctionAdapter<Data, TestAdapter.Companion.TestViewHol
 
     companion object {
         class TestViewHolder constructor(view: View?) : MultiFunctionAdapter.Companion.MultiFunctionViewHolder(view) {
-            fun bind(item: Data) {
-                itemView.findViewById<TextView>(R.id.title).text = item.name
+            fun bind(item: Data, position: Int) {
+                itemView.title.text = item.name
             }
         }
     }

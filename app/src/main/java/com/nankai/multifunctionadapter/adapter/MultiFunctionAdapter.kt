@@ -147,7 +147,7 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
      * @param isViewBinding boolean value, which indicates whether we are trying to bind the view or perform some action on adapter.
      * @return correct item index.
      */
-    private fun calculateIndex(index: Int, isViewBinding: Boolean): Int {
+    public fun calculateIndex(index: Int, isViewBinding: Boolean): Int {
         val adjIndex: Int
         return if (isViewBinding) {
             adjIndex = index - headerLayoutCount
@@ -231,8 +231,7 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
                 }
             }
             else -> {
-                val adjPosition = position - headerLayoutCount
-                onViewReady(holder, adjPosition)
+                onViewReady(holder, position)
             }
         }
     }
@@ -453,9 +452,15 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
         }
     }
 
+    override fun setEmptyView(layoutRes: Int) {
+        recyclerView?.run {
+            setEmptyView(LayoutInflater.from(context).inflate(layoutRes, null))
+        }
+    }
+
     /*
-         * Data binding
-         */
+     * Data binding
+     */
     override fun add(item: E?) {
         item?.let {
             val position = items.size
@@ -523,7 +528,7 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
         if (index >= items.size) {
             throw IllegalStateException("Index is defined in wrong range!")
         }
-        return items[calculateIndex(index, false)]
+        return items[calculateIndex(index, true)]
     }
 
     override fun set(item: E?, index: Int) {

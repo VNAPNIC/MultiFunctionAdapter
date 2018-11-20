@@ -22,7 +22,7 @@ interface IMultiFunctionAdapter<VH : MultiFunctionAdapter.Companion.MultiFunctio
 
     fun onInjectViewHolder(parent: ViewGroup, viewType: Int): VH
 
-    fun onViewReady(holder: VH, adjPosition: Int)
+    fun onViewReady(holder: VH, position: Int)
 
     fun getContentDataSize(): Int
 
@@ -56,6 +56,8 @@ interface IMultiFunctionAdapter<VH : MultiFunctionAdapter.Companion.MultiFunctio
     fun setLoadMoreView(): LoadMoreView
 
     //Empty
+    fun setEmptyView(layoutRes: Int)
+
     fun setEmptyView(view: View?)
 
     //binding data
