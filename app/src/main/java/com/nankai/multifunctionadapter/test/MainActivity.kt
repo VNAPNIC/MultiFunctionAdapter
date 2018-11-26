@@ -17,13 +17,19 @@ class MainActivity : AppCompatActivity(), IMultiFunctionAdapter.LoadMoreListener
     var adapter: TestAdapter? = null
     override fun onLoadMore() {
         Log.i(MainActivity::class.java.simpleName, "-------------------------> LoadMore")
-//        val handler = Handler()
-//        handler.postDelayed({
-//            if (!isFinishing) {
-//                adapter?.add(DummyData.getNewDummyData(adapter?.getAll() as MutableList<Data>))
-//                adapter?.isLoading = false
-//            }
-//        }, 5000)
+        val handler = Handler()
+        handler.postDelayed({
+            if (!isFinishing) {
+                adapter?.run {
+                    if (getContentDataSize() >=100){
+                        loadMoreStatus = LoadMoreView.STATUS_EMPTY
+                    }else {
+                        add(DummyData.getNewDummyData(adapter?.getAll() as MutableList<Data>))
+                    }
+                    isLoading = false
+                }
+            }
+        }, 100)
     }
 
     companion object {
@@ -41,8 +47,8 @@ class MainActivity : AppCompatActivity(), IMultiFunctionAdapter.LoadMoreListener
         adapter?.setEmptyView(LayoutInflater.from(baseContext).inflate(R.layout.layout_empty, null))
 
         adapter?.setOnLoadMoreListener(this)
-//        adapter?.isReloadMore = true
-//        adapter?.isAutoLoadMore = true
+        adapter?.isReloadMore = true
+        adapter?.isAutoLoadMore = true
 
         val data = DummyData.getDummyData()
         Log.i(TAG, "Dummy data : ${data.size}")

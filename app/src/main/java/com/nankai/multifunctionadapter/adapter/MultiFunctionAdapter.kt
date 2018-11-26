@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.*
 import java.util.*
 import java.util.concurrent.Executors
 
-abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.MultiFunctionViewHolder>
+abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.MultiFunctionViewHolder>
     : RecyclerView.Adapter<VH>()
         , IMultiFunctionAdapter<VH, E> {
 
@@ -57,7 +57,7 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
      */
     var footerViewAsFlow: Boolean = false
     private var mFooterLayout: LinearLayout? = null
-    var footerLayoutCount: Int = 0
+    private var footerLayoutCount: Int = 0
         get() = if (mFooterLayout != null)
             mFooterLayout!!.childCount
         else 0
@@ -81,7 +81,7 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
                     notifyItemChanged(getLoadMoreViewPosition())
                 }
             } else {
-                field = false
+                field = true
             }
         }
 
@@ -90,7 +90,8 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
             if (isLoadMoreEnable) {
                 if (value != mLoadMoreView?.loadMoreStatus) {
                     field = value
-
+                    if (field != LoadMoreView.STATUS_DEFAULT)
+                        isLoading = true
                     if (field == LoadMoreView.STATUS_END) {
                         mLoadMoreView?.loadMoreStatus = field
                         notifyItemRemoved(itemCount)
@@ -120,15 +121,16 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
      * Empty Layout
      */
     private var mEmptyLayout: FrameLayout? = null
-    var emptyLayoutCount: Int = 0
-        get() = if (mEmptyLayout != null)
+    private var emptyLayoutCount: Int = 0
+        get() = if (mEmptyLayout != null && enableEmpty && items.size <= 0)
             mEmptyLayout!!.childCount
         else 0
     var enableEmpty: Boolean = false
         set(value) {
-            recyclerView?.recycledViewPool?.clear()
-            field = value
-            notifyDataSetChanged()
+            if (value != field) {
+                field = value
+                notifyDataSetChanged()
+            }
         }
 
     /**
@@ -147,11 +149,13 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
      * @param isViewBinding boolean value, which indicates whether we are trying to bind the view or perform some action on adapter.
      * @return correct item index.
      */
-    public fun calculateIndex(index: Int, isViewBinding: Boolean): Int {
-        val adjIndex: Int
+    final fun calculateIndex(index: Int, isViewBinding: Boolean): Int {
+        var adjIndex: Int
         return if (isViewBinding) {
             adjIndex = index - headerLayoutCount
-
+            if (adjIndex == -1) {
+                adjIndex = 0
+            }
             if (adjIndex >= items.size) {
                 throw IllegalStateException("Index is defined in wrong range!")
             } else {
@@ -163,17 +167,17 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
         }
     }
 
-    override fun getItemCount(): Int =
-            if (enableEmpty)
+    final override fun getItemCount(): Int =
+            if (emptyLayoutCount > 0)
                 emptyLayoutCount + headerLayoutCount
             else
-                items.size + footerLayoutCount + loadMoreViewCount
+                items.size + headerLayoutCount + footerLayoutCount + loadMoreViewCount
 
     private fun getLoadMoreViewPosition(): Int = itemCount - loadMoreViewCount
 
-    override fun getContentDataSize(): Int = itemCount - footerLayoutCount - loadMoreViewCount
+    final override fun getContentDataSize(): Int = itemCount - (footerLayoutCount + loadMoreViewCount + emptyLayoutCount + headerLayoutCount)
 
-    override fun getItemViewType(position: Int): Int {
+    final override fun getItemViewType(position: Int): Int {
         if (position < headerLayoutCount)
             return HEADER_VIEW
 
@@ -181,7 +185,7 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
             return EMPTY_VIEW
 
         if (position < getContentDataSize())
-            return onInjectItemViewType(getContentDataSize())
+            return onInjectItemViewType(calculateIndex(position, true))
 
         if (footerLayoutCount > 0 && position < itemCount - loadMoreViewCount)
             return FOOTER_VIEW
@@ -189,7 +193,7 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
         return LOAD_MORE_VIEW
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH = when (viewType) {
+    final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH = when (viewType) {
 
         HEADER_VIEW -> HeaderViewHolder(mHeaderLayout) as VH
         EMPTY_VIEW -> EmptyViewHolder(mEmptyLayout) as VH
@@ -205,7 +209,7 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
 
     }
 
-    override fun onBindViewHolder(holder: VH, position: Int) {
+    final override fun onBindViewHolder(holder: VH, position: Int) {
         val viewType = (holder as MultiFunctionViewHolder).itemViewType
         when (viewType) {
             HEADER_VIEW -> {
@@ -217,8 +221,8 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
             LOAD_MORE_VIEW -> {
                 autoLoadMore(position)
                 mLoadMoreView?.convert(holder)
-                holder.itemView.setOnClickListener { _ ->
-                    mLoadMoreView.let {
+                holder.itemView.setOnClickListener { v ->
+                    mLoadMoreView.let { it ->
                         if (isReloadMore
                                 && (
                                         it?.loadMoreStatus == LoadMoreView.STATUS_FAIL
@@ -231,7 +235,7 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
                 }
             }
             else -> {
-                onViewReady(holder, position)
+                onViewReady(holder, calculateIndex(position, true))
             }
         }
     }
@@ -294,12 +298,11 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
      * @param view View for which we want to set default layout params.
      */
     private fun setDefaultLayoutParams(view: LinearLayout?, orientation: Int) {
-        val layoutParams: RecyclerView.LayoutParams?
-        if (orientation == LinearLayoutManager.VERTICAL) {
-            layoutParams = RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT,
+        val layoutParams: RecyclerView.LayoutParams? = if (orientation == LinearLayoutManager.VERTICAL) {
+            RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT,
                     RecyclerView.LayoutParams.WRAP_CONTENT)
         } else {
-            layoutParams = RecyclerView.LayoutParams(RecyclerView.LayoutParams.WRAP_CONTENT,
+            RecyclerView.LayoutParams(RecyclerView.LayoutParams.WRAP_CONTENT,
                     RecyclerView.LayoutParams.MATCH_PARENT)
         }
         view?.orientation = orientation
@@ -387,6 +390,29 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
     }
 
     /*
+   * Layout Empty
+   */
+    override fun setEmptyView(view: View?) {
+        setEmptyView(view, true)
+    }
+
+    override fun setEmptyView(view: View?, isFull: Boolean) {
+        view?.let {
+            if (mEmptyLayout == null) {
+                mEmptyLayout = FrameLayout(it.context)
+                mEmptyLayout?.layoutParams = if (isFull) {
+                    RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT,
+                            RecyclerView.LayoutParams.MATCH_PARENT)
+                } else {
+                    RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT,
+                            RecyclerView.LayoutParams.WRAP_CONTENT)
+                }
+            }
+            mEmptyLayout?.addView(it)
+        }
+    }
+
+    /*
      * LoadMore
      */
     override fun setOnLoadMoreListener(loadMoreListener: IMultiFunctionAdapter.LoadMoreListener) {
@@ -428,39 +454,12 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
     }
 
     private fun reloadMore() {
-        if (!isLoadMoreEnable)
-            return
-        mLoadMoreView?.loadMoreStatus = LoadMoreView.STATUS_DEFAULT
-        notifyItemChanged(getLoadMoreViewPosition())
+        isLoading = false
     }
 
     /*
-    * Layout Empty
-    */
-    override fun setEmptyView(view: View?) {
-        view?.let {
-            if (mEmptyLayout == null) {
-                mEmptyLayout = FrameLayout(view.context)
-                val layoutParams: RecyclerView.LayoutParams = RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT,
-                        RecyclerView.LayoutParams.MATCH_PARENT)
-                mEmptyLayout?.layoutParams = layoutParams
-            }
-            mEmptyLayout?.run {
-                addView(it)
-                notifyDataSetChanged()
-            }
-        }
-    }
-
-    override fun setEmptyView(layoutRes: Int) {
-        recyclerView?.run {
-            setEmptyView(LayoutInflater.from(context).inflate(layoutRes, null))
-        }
-    }
-
-    /*
-     * Data binding
-     */
+         * Data binding
+         */
     override fun add(item: E?) {
         item?.let {
             val position = items.size
@@ -482,7 +481,7 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
             throw IllegalStateException("Index is defined in wrong range!")
         } else {
             item?.let {
-                items.add(calculateIndex(index, false), it)
+                items.add(index, it)
                 notifyItemInserted(calculateIndex(index, false))
             }
         }
@@ -493,7 +492,7 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
             if (index >= items.size) {
                 throw IllegalStateException("Index is defined in wrong range!")
             } else {
-                items.addAll(calculateIndex(index, false), it)
+                items.addAll(index, it)
                 notifyItemRangeInserted(calculateIndex(index, false), it.size)
             }
         }
@@ -501,9 +500,9 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
 
     override fun remove(item: E?) {
         item?.let {
-            val position = items.indexOf(it)
+            val index = get(it)
             if (items.remove(it)) {
-                notifyItemRemoved(calculateIndex(position, false))
+                notifyItemRemoved(calculateIndex(index, false))
             }
         }
     }
@@ -519,27 +518,38 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
     override fun remove(index: Int) {
         if (index >= items.size) {
             throw IllegalStateException("Index is defined in wrong range!")
-        } else if (items.removeAt(calculateIndex(index, false)) != null) {
+        } else if (items.removeAt(index) != null) {
             notifyItemRemoved(calculateIndex(index, false))
         }
+    }
+
+    override fun getItemInCollection(index: Int): E {
+        if (index >= items.size) {
+            throw IllegalStateException("Index is defined in wrong range!")
+        }
+        return items[index]
     }
 
     override fun get(index: Int): E {
         if (index >= items.size) {
             throw IllegalStateException("Index is defined in wrong range!")
         }
-        return items[calculateIndex(index, true)]
+        return items[index]
+    }
+
+    override fun get(item: E?): Int {
+        return items.indexOf(item)
     }
 
     override fun set(item: E?, index: Int) {
-        item.let {
-            items[calculateIndex(index, false)] = it!!
+        item?.let {
+            items[index] = it
             notifyItemChanged(calculateIndex(index, false))
         }
     }
 
     override fun getAll(): Collection<E> {
-        return items
+        return ArrayList<E>(items)
     }
 
     /**
@@ -618,18 +628,15 @@ abstract class MultiFunctionAdapter<E, VH : MultiFunctionAdapter.Companion.Multi
     }
 
     //=================================== Inner class ============================================//
-    companion object {
-        private val TAG: String = MultiFunctionAdapter::class.java.simpleName
+    private val TAG: String = MultiFunctionAdapter::class.java.simpleName
 
-        open class MultiFunctionViewHolder internal constructor(rootView: View?) : RecyclerView.ViewHolder(rootView!!)
+    open class MultiFunctionViewHolder internal constructor(rootView: View?) : RecyclerView.ViewHolder(rootView!!)
 
-        class HeaderViewHolder internal constructor(view: View?) : MultiFunctionViewHolder(view)
+    class HeaderViewHolder internal constructor(view: View?) : MultiFunctionViewHolder(view)
 
-        class EmptyViewHolder internal constructor(view: View?) : MultiFunctionViewHolder(view)
+    class EmptyViewHolder internal constructor(view: View?) : MultiFunctionViewHolder(view)
 
-        class FooterViewHolder internal constructor(view: View?) : MultiFunctionViewHolder(view)
+    class FooterViewHolder internal constructor(view: View?) : MultiFunctionViewHolder(view)
 
-        class LoadMoreViewHolder internal constructor(view: View?) : MultiFunctionViewHolder(view)
-
-    }
+    class LoadMoreViewHolder internal constructor(view: View?) : MultiFunctionViewHolder(view)
 }

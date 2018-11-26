@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.DiffUtil
 
-interface IMultiFunctionAdapter<VH : MultiFunctionAdapter.Companion.MultiFunctionViewHolder, E> {
+interface IMultiFunctionAdapter<VH : MultiFunctionAdapter.MultiFunctionViewHolder, E> {
 
     val HEADER_VIEW: Int
         get() = -1
@@ -56,9 +56,9 @@ interface IMultiFunctionAdapter<VH : MultiFunctionAdapter.Companion.MultiFunctio
     fun setLoadMoreView(): LoadMoreView
 
     //Empty
-    fun setEmptyView(layoutRes: Int)
-
     fun setEmptyView(view: View?)
+
+    fun setEmptyView(view: View?,isFull: Boolean)
 
     //binding data
     fun add(item: E?)
@@ -75,7 +75,11 @@ interface IMultiFunctionAdapter<VH : MultiFunctionAdapter.Companion.MultiFunctio
 
     fun remove(index: Int)
 
+    fun getItemInCollection(index: Int): E
+
     fun get(index: Int): E
+
+    fun get(item: E?): Int
 
     fun set(item: E?, index: Int)
 
