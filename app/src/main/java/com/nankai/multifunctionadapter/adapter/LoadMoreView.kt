@@ -59,7 +59,7 @@ abstract class LoadMoreView {
     @get:IdRes
     public abstract val loadEmptyViewId: Int
 
-    fun convert(holder: MultiFunctionAdapter.Companion.MultiFunctionViewHolder) {
+    fun convert(holder: MultiFunctionAdapter.MultiFunctionViewHolder) {
         Log.i(LoadMoreView::class.java.simpleName, "load more status: $loadMoreStatus")
         when (loadMoreStatus) {
             STATUS_LOADING -> {
@@ -95,19 +95,19 @@ abstract class LoadMoreView {
         }
     }
 
-    private fun visibleLoading(holder: MultiFunctionAdapter.Companion.MultiFunctionViewHolder, visible: Boolean) {
+    private fun visibleLoading(holder: MultiFunctionAdapter.MultiFunctionViewHolder, visible: Boolean) {
         setVisible(holder, loadingViewId, visible)
     }
 
-    private fun visibleEmpty(holder: MultiFunctionAdapter.Companion.MultiFunctionViewHolder, visible: Boolean) {
+    private fun visibleEmpty(holder: MultiFunctionAdapter.MultiFunctionViewHolder, visible: Boolean) {
         setVisible(holder, loadEmptyViewId, visible)
     }
 
-    private fun visibleLoadFail(holder: MultiFunctionAdapter.Companion.MultiFunctionViewHolder, visible: Boolean) {
+    private fun visibleLoadFail(holder: MultiFunctionAdapter.MultiFunctionViewHolder, visible: Boolean) {
         setVisible(holder, loadFailViewId, visible)
     }
 
-    private fun visibleLoadEnd(holder: MultiFunctionAdapter.Companion.MultiFunctionViewHolder, visible: Boolean) {
+    private fun visibleLoadEnd(holder: MultiFunctionAdapter.MultiFunctionViewHolder, visible: Boolean) {
         val loadEndViewId = loadEndViewId
         if (loadEndViewId != 0) {
             val view = holder.itemView.findViewById<View>(loadEndViewId)
@@ -115,7 +115,7 @@ abstract class LoadMoreView {
         }
     }
 
-    private fun setVisible(holder: MultiFunctionAdapter.Companion.MultiFunctionViewHolder, @IdRes viewId: Int, visible: Boolean) {
+    private fun setVisible(holder: MultiFunctionAdapter.MultiFunctionViewHolder, @IdRes viewId: Int, visible: Boolean) {
         val view = holder.itemView.findViewById<View>(viewId)
         view.visibility = if (visible) View.VISIBLE else View.INVISIBLE
     }

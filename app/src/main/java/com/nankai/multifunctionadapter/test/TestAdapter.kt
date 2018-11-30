@@ -9,7 +9,7 @@ import com.nankai.multifunctionadapter.adapter.MultiFunctionAdapter
 import com.nankai.multifunctionadapter.repository.Data
 import kotlinx.android.synthetic.main.item_test.view.*
 
-class TestAdapter : MultiFunctionAdapter<Data, TestAdapter.Companion.TestViewHolder>() {
+class TestAdapter : MultiFunctionAdapter<Data, TestAdapter.TestViewHolder>() {
 
     override fun onInjectViewHolder(parent: ViewGroup, viewType: Int): TestViewHolder {
         return TestViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_test, parent, false))
@@ -24,13 +24,9 @@ class TestAdapter : MultiFunctionAdapter<Data, TestAdapter.Companion.TestViewHol
         return LoadMoreTest()
     }
 
-    companion object {
-        class TestViewHolder constructor(view: View?) : MultiFunctionAdapter.Companion.MultiFunctionViewHolder(view) {
-            fun bind(item: Data, position: Int) {
-                itemView.title.text = item.name
-            }
+    class TestViewHolder constructor(view: View?) : MultiFunctionAdapter.MultiFunctionViewHolder(view) {
+        fun bind(item: Data, position: Int) {
+            itemView.title.text = item.name
         }
     }
-
-
 }
